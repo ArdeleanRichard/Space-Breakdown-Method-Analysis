@@ -5,8 +5,8 @@ SBM has been published by IEEE in September 2019:
 - Conference: 2019 IEEE 15th International Conference on Intelligent Computer Communication and Processing (ICCP)
 
 
-# Git repository structure
-This repository is complete version of the 'Space-Breakdown-Method' repository including the analysis of various algorithms in comparison with SBM. 
+## Git repository structure
+This repository is the complete version of the 'Space-Breakdown-Method' repository including the analysis of various algorithms in comparison with SBM. 
 
 The code folder structure:
 - run.py : main file to run the code from
@@ -16,13 +16,13 @@ The code folder structure:
 - dataset parsing: scripts for parsing different datasets
 - common/validation/visualization: utilitary functions
 
-# Setup
+## Setup
 The 'requirements.txt' file indicates the dependencies required for running the code. The data used in this study can be downloaded from: https://1drv.ms/u/s!AgNd2yQs3Ad0gSjeHumstkCYNcAk?e=QfGIJO. 
 
 The paths to the data folder on your local workstation need to be set from the 'constants.py' file (DATA_FOLDER_PATH, SIM_DATA_FOLDER_PATH, REAL_DATA_FOLDER_PATH).
 
 
-# Citation
+## Citation
 We would appreciate it if you cite the paper when you use this work:
 
 - For Plain Text:

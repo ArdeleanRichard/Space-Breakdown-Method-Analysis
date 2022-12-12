@@ -128,7 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-.idea/
 
 data/*.mat
 data/M045_SRCS_0009_MT/
