@@ -24,8 +24,6 @@ from dataset_parsing.realdata_ssd import find_ssd_files, separate_by_unit, units
 
 import time
 
-os.chdir("../")
-
 
 # X, y = cds.generate_simulated_data()
 # time_sum = 0
