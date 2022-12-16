@@ -10,6 +10,7 @@ from fcmeans import FCM
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from sklearn.neighbors import NearestNeighbors
+from sklearn.preprocessing import LabelEncoder
 
 from algorithms import ISBM, SBM
 import dataset_parsing.simulations_dataset as sds
@@ -120,10 +121,15 @@ def compare_plots_and_metrics(Title, X, y, n_clusters, eps, pn=25, pn2=None, Xvi
     else:
         sbm_array_labels = SBM.best(X, pn2, ccThreshold=5)
 
+    le = LabelEncoder()
+    sbm_array_labels = le.fit_transform(sbm_array_labels)
+
     # sp.plot_grid(f'SBM on {Title}', X, pn, sbm_array_labels, marker='o')
     sp.plot(f'SBM on {Title}', Xvis, sbm_array_labels, marker='o', alpha=0.5)
 
     sbm_graph_labels = ISBM.run(X, pn, ccThreshold=5, adaptivePN=True)
+    le = LabelEncoder()
+    sbm_graph_labels = le.fit_transform(sbm_graph_labels)
     # sp.plot_grid(f'ISBM on {Title}', X, pn, sbm_graph_labels, marker='o', adaptivePN=True)
     sp.plot(f'ISBM on {Title}', Xvis, sbm_graph_labels, marker='o', alpha=0.5)
 

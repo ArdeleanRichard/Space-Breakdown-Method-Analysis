@@ -27,7 +27,7 @@ def plot(title, X, labels=None, plot=True, marker='o', alpha=1):
                 plt.scatter(X[:, 0], X[:, 1], marker=marker, edgecolors='k')
             else:
                 try:
-                    label_color = [cs.LABEL_COLOR_MAP[l] for l in labels]
+                    label_color = [l for l in labels]
                 except KeyError:
                     print('Too many labels! Using default colors...\n')
                     label_color = [l for l in labels]
