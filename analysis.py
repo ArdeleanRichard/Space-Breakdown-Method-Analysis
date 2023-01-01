@@ -22,7 +22,7 @@ import dataset_parsing.clustering_datasets as cds
 #
 # X, y = sds.get_dataset_simulation_pca_2d(4)
 # try_metric(X, y, 5, 0.1, 25)
-# compare_result_graph_vs_array_structure('Sim4', X, y, 5, 0.1, 10)
+# compare_result_graph_vs_array_structure('Sim4', X, y, 5, 0.1, 25)
 #
 # X, y = sds.get_dataset_simulation_pca_2d(1)
 # try_metric(X, y, 17, 0.05, 46)
@@ -54,10 +54,8 @@ import dataset_parsing.clustering_datasets as cds
 # compare_time_graph_vs_array_structure(X, y, 5, 0.1, 25, runs=100)
 # compare_metrics_graph_vs_array_structure('Sim4', X, y, 5, 0.1, 25)
 
-X, y = sds.get_dataset_simulation_pca_2d(1)
-import visualization.scatter_plot as sp
-sp.plot(f'Synthetic dataset (Sim1)  ground truth', X, y, marker='o', alpha=0.5)
-plt.show()
+
+# X, y = sds.get_dataset_simulation_pca_2d(1)
 # print(len(np.unique(y)))
 # compare_result_graph_vs_array_structure('Sim1', X, y, 17, 0.1, 46)
 # compare_time_graph_vs_array_structure(X, y, 17, 0.1, 46, runs=100)
@@ -116,27 +114,3 @@ plt.show()
 
 
 
-# import visualization.scatter_plot as sp
-# from visualization.scatter_plot_additionals import plot_spikes_by_clusters
-#
-# X, y = sds.get_dataset_simulation(1)
-# pca_2d = PCA(n_components=2)
-# pca_2d = pca_2d.fit_transform(X)
-
-# sp.plot(f'Sim1 ground truth', pca_2d, y, marker='o', alpha=0.5)
-# plot_spikes_by_clusters(X,  y)
-#
-# kmeans = KMeans(n_clusters=len(np.unique(y)), random_state=0).fit(pca_2d)
-# sp.plot(f'KMeans on Sim1', pca_2d, kmeans.labels_, marker='o', alpha=0.5)
-# plot_spikes_by_clusters(X,  kmeans.labels_)
-#
-# isosplit_labels = np.loadtxt("./isosplit/sim1_isosplit.csv", delimiter=',', dtype=int)
-# sp.plot(f'ISO-SPLIT on Sim1', pca_2d, isosplit_labels, marker='o', alpha=0.5)
-# plot_spikes_by_clusters(X,  isosplit_labels)
-
-# pn=46
-# sbm_graph_labels = ISBM.run(pca_2d, pn, ccThreshold=5, adaptivePN=True)
-# sp.plot(f'ISBM on Sim1', pca_2d, sbm_graph_labels, marker='o')
-# plot_spikes_by_clusters(X,  sbm_graph_labels)
-#
-# plt.show()

@@ -9,7 +9,7 @@ from dataset_parsing.realdata_ssd import find_ssd_files, separate_by_unit, units
 # change NR_CHANNELS=33
 # DATASET_PATH = '../../data/M045_SRCS_0009/'
 # DATASET_PATH = '../../data/M045_0009/'
-DATASET_PATH = '../../datasets/real_data/M017_4/sorted/'
+DATASET_PATH = '../../DATA/TINS/M017_4/sorted/'
 
 
 spikes_per_unit, unit_electrode = parse_ssd_file(DATASET_PATH)

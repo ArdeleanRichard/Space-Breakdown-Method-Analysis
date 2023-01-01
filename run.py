@@ -17,7 +17,7 @@ from algorithms import SBM, ISBM
 from dataset_parsing.realdata_ssd_multitrode import parse_ssd_file, split_multitrode, plot_multitrode
 from dataset_parsing.realdata_parsing import read_timestamps, read_waveforms, read_event_timestamps, read_event_codes
 from dataset_parsing.realdata_ssd import find_ssd_files, separate_by_unit, units_by_channel
-from visualization.scatter_plot_additionals import plot_spikes_by_clusters
+from visualization.scatter_plot_additionals import plot_spikes_by_clusters, plot_spikes_by_clusters_cmap
 
 
 def run_ISBM_graph_on_simulated_data():
@@ -48,17 +48,17 @@ def run_ISBM_graph_on_real_data():
         X = pca_2d.fit_transform(data)
         km_labels = labels[i-1]
 
-        sp.plot('Ground truth', X, km_labels, marker='o')
-
-        sbm_graph_labels = ISBM.run(X, pn, ccThreshold=5, adaptivePN=True)
-        sp.plot_grid(f'ISBM on Channel {i}', X, pn, sbm_graph_labels, marker='o', adaptivePN=True)
-
-        plot_spikes_by_clusters(data, sbm_graph_labels)
+        # sp.plot_cm_tab('Ground truth', X, km_labels, marker='o')
+        #
+        # sbm_graph_labels = ISBM.run(X, pn, ccThreshold=5, adaptivePN=True)
+        # sp.plot_cm_tab(f'ISBM on Channel {i}', X, sbm_graph_labels, marker='o')
+        #
+        # plot_spikes_by_clusters_cmap(data, sbm_graph_labels)
 
         km = KMeans(n_clusters=5).fit(X)
-        sp.plot(f'K-means on Channel {i}', X, km.labels_, marker='o')
+        sp.plot_cm_tab(f'K-means on Channel {i}', X, km.labels_, marker='o')
 
-        plot_spikes_by_clusters(data,  km.labels_)
+        plot_spikes_by_clusters_cmap(data,  km.labels_)
 
     plt.show()
 
@@ -86,7 +86,7 @@ def run_ISBM_graph_on_real_data_tetrode():
     units_by_multitrodes = split_multitrode(units_in_multitrode, MULTITRODE_WAVEFORM_LENGTH, WAVEFORM_LENGTH)
 
 
-    # plot_multitrode(units_by_multitrodes, labels, MULTITRODE_CHANNEL, NR_ELECTRODES_PER_MULTITRODE, nr_dim=3)
+    plot_multitrode(units_by_multitrodes, labels, MULTITRODE_CHANNEL, NR_ELECTRODES_PER_MULTITRODE, nr_dim=3)
     labels = labels[MULTITRODE_CHANNEL]
 
     data_electrode1 = units_by_multitrodes[MULTITRODE_CHANNEL][0]
@@ -108,7 +108,7 @@ def run_ISBM_graph_on_real_data_tetrode():
     pca_electrode1 = pca_.fit_transform(data_electrode1)
     np.savetxt(f"matlab_realdata.csv", pca_electrode1)
     # compare_plots_and_metrics("Electrode 1", pca_electrode1, labels, n_clusters=4, eps=18, pn=20, pn2=10, Xvis=None)
-    compare_plots_and_metrics("Tetrode", pca_vis, labels, n_clusters=4, eps=18, pn=20, pn2=10, Xvis=pca_vis)
+    # compare_plots_and_metrics("Tetrode", pca_vis, labels, n_clusters=4, eps=18, pn=20, pn2=10, Xvis=pca_vis)
 
     # pca_ = PCA(n_components=2)
     # pca_electrode1 = pca_.fit_transform(data_electrode1)
@@ -127,7 +127,7 @@ def run_ISBM_graph_on_real_data_tetrode():
 
 
 if __name__ == '__main__':
-    run_ISBM_graph_on_simulated_data()
+    # run_ISBM_graph_on_simulated_data()
     # run_ISBM_graph_on_real_data()
-    # run_ISBM_graph_on_real_data_tetrode()
+    run_ISBM_graph_on_real_data_tetrode()
 

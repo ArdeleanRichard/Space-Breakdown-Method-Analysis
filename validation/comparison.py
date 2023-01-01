@@ -3,6 +3,8 @@ import math
 import numpy as np
 import time
 
+from hdbscan import HDBSCAN
+from joblib import Memory
 from sklearn import preprocessing
 from sklearn.cluster import DBSCAN, KMeans, estimate_bandwidth, MeanShift, AgglomerativeClustering
 from sklearn.metrics import adjusted_rand_score, adjusted_mutual_info_score, fowlkes_mallows_score, v_measure_score
@@ -90,31 +92,44 @@ def try_metric(X, y, n_clusters, eps, pn=25, no_noise=True):
 
 
 def compare_plots_and_metrics(Title, X, y, n_clusters, eps, pn=25, pn2=None, Xvis=None):
-    sp.plot(f'{Title} ground truth', X, y, marker='o', alpha=0.3)
+    sp.plot_cm_tab(f'{Title} ground truth', X, y, marker='o', alpha=0.9)
 
     if Xvis is None:
         Xvis = np.copy(X)
 
     kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(X)
-    sp.plot(f'KMeans on {Title}', Xvis, kmeans.labels_, marker='o', alpha=0.5)
+    sp.plot_cm_tab(f'KMeans on {Title}', Xvis, kmeans.labels_, marker='o', alpha=0.9)
 
     dbscan = DBSCAN(eps=eps, min_samples=np.log(len(X))).fit(X)
-    sp.plot(f'DBSCAN on {Title}', Xvis, dbscan.labels_, marker='o', alpha=0.5)
+    sp.plot_cm_tab(f'DBSCAN on {Title}', Xvis, dbscan.labels_, marker='o', alpha=0.9)
     #
     # # af = AffinityPropagation(random_state=5).fit(X)
     # # sp.plot(f'AffinityPropagation on {Title}', X, af.labels_, marker='o')
     #
     bandwidth = estimate_bandwidth(X, quantile=0.07, n_samples=500)
     ms = MeanShift(bandwidth=bandwidth, bin_seeding=True).fit(X)
-    sp.plot(f'MeanShift on {Title}', Xvis, ms.labels_, marker='o', alpha=0.5)
+    sp.plot_cm_tab(f'MeanShift on {Title}', Xvis, ms.labels_, marker='o', alpha=0.9)
 
     ward = AgglomerativeClustering(n_clusters=n_clusters, linkage="ward").fit(X)
-    sp.plot(f'AgglomerativeClustering on {Title}', X, ward.labels_, marker='o', alpha=0.5)
+    sp.plot_cm_tab(f'AgglomerativeClustering on {Title}', X, ward.labels_, marker='o', alpha=0.9)
 
     my_model = FCM(n_clusters=n_clusters)
     my_model.fit(X)
     labels = my_model.predict(X)
-    sp.plot(f'FCM on {Title}', Xvis, labels, marker='o', alpha=0.5)
+    sp.plot_cm_tab(f'FCM on {Title}', Xvis, labels, marker='o', alpha=0.9)
+
+    hdbscan = HDBSCAN(algorithm='best', alpha=1.0, approx_min_span_tree=True,
+                      gen_min_span_tree=False, leaf_size=10, memory=Memory(cachedir=None),
+                      metric='euclidean', min_cluster_size=10, min_samples=None, p=None).fit(Xvis)
+    hdbscan_labels = hdbscan.labels_
+
+    sp.plot_cm_tab(f'HDBSCAN on Electrode 1', Xvis, hdbscan_labels, marker='o', alpha=0.9)
+    plt.show()
+
+    isosplit_labels = np.loadtxt(f"./isosplit/realdata_isosplit.csv", delimiter=',', dtype=int)
+
+    sp.plot_cm_tab(f'ISO-SPLIT on Electrode 1', Xvis, isosplit_labels, marker='o', alpha=0.9)
+    plt.show()
 
     if pn2 is None:
         sbm_array_labels = SBM.best(X, pn, ccThreshold=5)
@@ -125,99 +140,113 @@ def compare_plots_and_metrics(Title, X, y, n_clusters, eps, pn=25, pn2=None, Xvi
     sbm_array_labels = le.fit_transform(sbm_array_labels)
 
     # sp.plot_grid(f'SBM on {Title}', X, pn, sbm_array_labels, marker='o')
-    sp.plot(f'SBM on {Title}', Xvis, sbm_array_labels, marker='o', alpha=0.5)
+    sp.plot_cm_tab(f'SBM on {Title}', Xvis, sbm_array_labels, marker='o', alpha=0.9)
 
     sbm_graph_labels = ISBM.run(X, pn, ccThreshold=5, adaptivePN=True)
     le = LabelEncoder()
     sbm_graph_labels = le.fit_transform(sbm_graph_labels)
     # sp.plot_grid(f'ISBM on {Title}', X, pn, sbm_graph_labels, marker='o', adaptivePN=True)
-    sp.plot(f'ISBM on {Title}', Xvis, sbm_graph_labels, marker='o', alpha=0.5)
+    sp.plot_cm_tab(f'ISBM on {Title}', Xvis, sbm_graph_labels, marker='o', alpha=0.9)
 
     plt.show()
-
-
-    print(f"{Title} - ARI: "
-          f"KMeans={adjusted_rand_score(y, kmeans.labels_):.3f}\t"
-          f"DBSCAN={adjusted_rand_score(y, dbscan.labels_):.3f}\t"
-          f"MS={adjusted_rand_score(y, ms.labels_):.3f}\t"
-          f"Ag={adjusted_rand_score(y, ward.labels_):.3f}\t"
-          f"FCM={adjusted_rand_score(y, labels):.3f}\t"
-          f"SBM={adjusted_rand_score(y, sbm_array_labels):.3f}\t"
-          f"ISBM={adjusted_rand_score(y, sbm_graph_labels):.3f}\t")
-
-    print(f"{Title} - AMI: "
-          f"KMeans={adjusted_mutual_info_score(y, kmeans.labels_):.3f}\t"
-          f"DBSCAN={adjusted_mutual_info_score(y, dbscan.labels_):.3f}\t"
-          f"MS={adjusted_mutual_info_score(y, ms.labels_):.3f}\t"
-          f"Ag={adjusted_mutual_info_score(y, ward.labels_):.3f}\t"
-          f"FCM={adjusted_mutual_info_score(y, labels):.3f}\t"
-          f"SBM={adjusted_mutual_info_score(y, sbm_array_labels):.3f}\t"
-          f"ISBM={adjusted_mutual_info_score(y, sbm_graph_labels):.3f}\t")
-
-    print(f"{Title} - Purity: "
-          f"KMeans={purity_score(y, kmeans.labels_):.3f}\t"
-          f"DBSCAN={purity_score(y, dbscan.labels_):.3f}\t"
-          f"MS={purity_score(y, ms.labels_):.3f}\t"
-          f"Ag={purity_score(y, ward.labels_):.3f}\t"
-          f"FCM={purity_score(y, labels):.3f}\t"
-          f"SBM={purity_score(y, sbm_array_labels):.3f}\t"
-          f"ISBM={purity_score(y, sbm_graph_labels):.3f}\t")
-
-    print(f"{Title} - FMI: "
-          f"KMeans={fowlkes_mallows_score(y, kmeans.labels_):.3f}\t"
-          f"DBSCAN={fowlkes_mallows_score(y, dbscan.labels_):.3f}\t"
-          f"MS={fowlkes_mallows_score(y, ms.labels_):.3f}\t"
-          f"Ag={fowlkes_mallows_score(y, ward.labels_):.3f}\t"
-          f"FCM={fowlkes_mallows_score(y, labels):.3f}\t"
-          f"SBM={fowlkes_mallows_score(y, sbm_array_labels):.3f}\t"
-          f"ISBM={fowlkes_mallows_score(y, sbm_graph_labels):.3f}\t")
-
-    print(f"{Title} - VM: "
-          f"KMeans={v_measure_score(y, kmeans.labels_):.3f}\t"
-          f"DBSCAN={v_measure_score(y, dbscan.labels_):.3f}\t"
-          f"MS={v_measure_score(y, ms.labels_):.3f}\t"
-          f"Ag={v_measure_score(y, ward.labels_):.3f}\t"
-          f"FCM={v_measure_score(y, labels):.3f}\t"
-          f"SBM={v_measure_score(y, sbm_array_labels):.3f}\t"
-          f"ISBM={v_measure_score(y, sbm_graph_labels):.3f}\t")
-
-    print(f"{Title} - SCS: "
-          f"KMeans={ss_metric(y, kmeans.labels_):.3f}\t"
-          f"DBSCAN={ss_metric(y, dbscan.labels_):.3f}\t"
-          f"MS={ss_metric(y, ms.labels_):.3f}\t"
-          f"Ag={ss_metric(y, ward.labels_):.3f}\t"
-          f"FCM={ss_metric(y, labels):.3f}\t"
-          f"SBM={ss_metric(y, sbm_array_labels):.3f}\t"
-          f"ISBM={ss_metric(y, sbm_graph_labels):.3f}\t")
+    #
+    #
+    # print(f"{Title} - ARI: "
+    #       f"KMeans={adjusted_rand_score(y, kmeans.labels_):.3f}\t"
+    #       f"DBSCAN={adjusted_rand_score(y, dbscan.labels_):.3f}\t"
+    #       f"MS={adjusted_rand_score(y, ms.labels_):.3f}\t"
+    #       f"Ag={adjusted_rand_score(y, ward.labels_):.3f}\t"
+    #       f"FCM={adjusted_rand_score(y, labels):.3f}\t"
+    #       f"SBM={adjusted_rand_score(y, sbm_array_labels):.3f}\t"
+    #       f"ISBM={adjusted_rand_score(y, sbm_graph_labels):.3f}\t")
+    #
+    # print(f"{Title} - AMI: "
+    #       f"KMeans={adjusted_mutual_info_score(y, kmeans.labels_):.3f}\t"
+    #       f"DBSCAN={adjusted_mutual_info_score(y, dbscan.labels_):.3f}\t"
+    #       f"MS={adjusted_mutual_info_score(y, ms.labels_):.3f}\t"
+    #       f"Ag={adjusted_mutual_info_score(y, ward.labels_):.3f}\t"
+    #       f"FCM={adjusted_mutual_info_score(y, labels):.3f}\t"
+    #       f"SBM={adjusted_mutual_info_score(y, sbm_array_labels):.3f}\t"
+    #       f"ISBM={adjusted_mutual_info_score(y, sbm_graph_labels):.3f}\t")
+    #
+    # print(f"{Title} - Purity: "
+    #       f"KMeans={purity_score(y, kmeans.labels_):.3f}\t"
+    #       f"DBSCAN={purity_score(y, dbscan.labels_):.3f}\t"
+    #       f"MS={purity_score(y, ms.labels_):.3f}\t"
+    #       f"Ag={purity_score(y, ward.labels_):.3f}\t"
+    #       f"FCM={purity_score(y, labels):.3f}\t"
+    #       f"SBM={purity_score(y, sbm_array_labels):.3f}\t"
+    #       f"ISBM={purity_score(y, sbm_graph_labels):.3f}\t")
+    #
+    # print(f"{Title} - FMI: "
+    #       f"KMeans={fowlkes_mallows_score(y, kmeans.labels_):.3f}\t"
+    #       f"DBSCAN={fowlkes_mallows_score(y, dbscan.labels_):.3f}\t"
+    #       f"MS={fowlkes_mallows_score(y, ms.labels_):.3f}\t"
+    #       f"Ag={fowlkes_mallows_score(y, ward.labels_):.3f}\t"
+    #       f"FCM={fowlkes_mallows_score(y, labels):.3f}\t"
+    #       f"SBM={fowlkes_mallows_score(y, sbm_array_labels):.3f}\t"
+    #       f"ISBM={fowlkes_mallows_score(y, sbm_graph_labels):.3f}\t")
+    #
+    # print(f"{Title} - VM: "
+    #       f"KMeans={v_measure_score(y, kmeans.labels_):.3f}\t"
+    #       f"DBSCAN={v_measure_score(y, dbscan.labels_):.3f}\t"
+    #       f"MS={v_measure_score(y, ms.labels_):.3f}\t"
+    #       f"Ag={v_measure_score(y, ward.labels_):.3f}\t"
+    #       f"FCM={v_measure_score(y, labels):.3f}\t"
+    #       f"SBM={v_measure_score(y, sbm_array_labels):.3f}\t"
+    #       f"ISBM={v_measure_score(y, sbm_graph_labels):.3f}\t")
+    #
+    # print(f"{Title} - SCS: "
+    #       f"KMeans={ss_metric(y, kmeans.labels_):.3f}\t"
+    #       f"DBSCAN={ss_metric(y, dbscan.labels_):.3f}\t"
+    #       f"MS={ss_metric(y, ms.labels_):.3f}\t"
+    #       f"Ag={ss_metric(y, ward.labels_):.3f}\t"
+    #       f"FCM={ss_metric(y, labels):.3f}\t"
+    #       f"SBM={ss_metric(y, sbm_array_labels):.3f}\t"
+    #       f"ISBM={ss_metric(y, sbm_graph_labels):.3f}\t")
 
 
 
 def compare_result_graph_vs_array_structure(Title, X, y, n_clusters, eps, pn=25, pn2=None, Xvis=None):
-    sp.plot(f'Synthetic dataset ({Title})  ground truth', X, y, marker='o', alpha=0.3)
+    # sp.plot(f'Synthetic dataset ({Title})  ground truth', X, y, marker='o', alpha=0.3)
+    # sp.plot_cm_tab(f'Synthetic dataset ({Title})  ground truth', X, y, marker='o', alpha=0.9, cmap='tab20')
+    sp.plot_cm_tab(f'Synthetic dataset ({Title})  ground truth', X, y, marker='o', alpha=0.9)
 
     if Xvis is None:
         Xvis = np.copy(X)
 
     kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(X)
-    sp.plot(f'KMeans on {Title}', Xvis, kmeans.labels_, marker='o')
+    # sp.plot(f'KMeans on {Title}', Xvis, kmeans.labels_, marker='o')
+    sp.plot_cm_tab(f'KMeans on ({Title})', Xvis, kmeans.labels_, marker='o', alpha=0.9)
 
     dbscan = DBSCAN(eps=eps, min_samples=np.log(len(X))).fit(X)
-    sp.plot(f'DBSCAN on {Title}', Xvis, dbscan.labels_, marker='o')
+    # sp.plot(f'DBSCAN on {Title}', Xvis, dbscan.labels_, marker='o')
+    sp.plot_cm_tab(f'DBSCAN on {Title}', Xvis, dbscan.labels_, marker='o', alpha=0.9)
+
     #
     # # af = AffinityPropagation(random_state=5).fit(X)
     # # sp.plot(f'AffinityPropagation on {Title}', X, af.labels_, marker='o')
     #
     bandwidth = estimate_bandwidth(X, quantile=0.07, n_samples=500)
     ms = MeanShift(bandwidth=bandwidth, bin_seeding=True).fit(X)
-    sp.plot(f'MeanShift on {Title}', Xvis, ms.labels_, marker='o')
+    # sp.plot(f'MeanShift on {Title}', Xvis, ms.labels_, marker='o')
+    sp.plot_cm_tab(f'MeanShift on {Title}', Xvis, ms.labels_, marker='o', alpha=0.9)
 
     ward = AgglomerativeClustering(n_clusters=n_clusters, linkage="ward").fit(X)
-    sp.plot(f'AgglomerativeClustering on {Title}', X, ward.labels_, marker='o')
+    # sp.plot(f'AgglomerativeClustering on {Title}', X, ward.labels_, marker='o')
+    sp.plot_cm_tab(f'AgglomerativeClustering on {Title}', Xvis, ward.labels_, marker='o', alpha=0.9)
 
     my_model = FCM(n_clusters=n_clusters)
     my_model.fit(X)
     labels = my_model.predict(X)
-    sp.plot(f'FCM on {Title}', Xvis, labels, marker='o')
+    # sp.plot(f'FCM on {Title}', Xvis, labels, marker='o')
+    sp.plot_cm_tab(f'FCM on {Title}', Xvis, labels, marker='o', alpha=0.9)
+
+    hdbscan = HDBSCAN(algorithm='best', alpha=1.0, approx_min_span_tree=True,
+            gen_min_span_tree=False, leaf_size=40, memory=Memory(cachedir=None),
+            metric='euclidean', min_cluster_size=10, min_samples=None, p=None).fit(X)
+    hdbscan_labels = hdbscan.labels_
+    sp.plot_cm_tab(f'HDBSCAN on {Title}', Xvis, hdbscan_labels, marker='o', alpha=0.9)
 
     if pn2 is None:
         sbm_array_labels = SBM.best(X, pn, ccThreshold=5)
@@ -225,11 +254,15 @@ def compare_result_graph_vs_array_structure(Title, X, y, n_clusters, eps, pn=25,
         sbm_array_labels = SBM.best(X, pn2, ccThreshold=5)
 
     # sp.plot_grid(f'SBM on {Title}', X, pn, sbm_array_labels, marker='o')
-    sp.plot(f'SBM on {Title}', Xvis, sbm_array_labels, marker='o')
+    # sp.plot(f'SBM on {Title}', Xvis, sbm_array_labels, marker='o')
+    # sp.plot_cm_tab(f'SBM on {Title}', Xvis, sbm_array_labels, marker='o', alpha=0.9, cmap='tab20')
+    sp.plot_cm_tab(f'SBM on {Title}', Xvis, sbm_array_labels, marker='o', alpha=0.9)
 
     sbm_graph_labels = ISBM.run(X, pn, ccThreshold=5, adaptivePN=True)
     # sp.plot_grid(f'ISBM on {Title}', X, pn, sbm_graph_labels, marker='o', adaptivePN=True)
-    sp.plot(f'ISBM on {Title}', Xvis, sbm_graph_labels, marker='o')
+    # sp.plot(f'ISBM on {Title}', Xvis, sbm_graph_labels, marker='o')
+    # sp.plot_cm_tab(f'ISBM on {Title}', Xvis, sbm_graph_labels, marker='o', alpha=0.9, cmap='tab20')
+    sp.plot_cm_tab(f'ISBM on {Title}', Xvis, sbm_graph_labels, marker='o', alpha=0.9)
 
     plt.show()
 

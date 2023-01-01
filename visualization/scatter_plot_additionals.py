@@ -90,6 +90,20 @@ def plot_spikes_by_clusters(spikes, labels, mean=True):
     plt.show()
 
 
+def plot_spikes_by_clusters_cmap(spikes, labels, mean=True):
+    for lab in np.unique(labels):
+        plt.figure()
+        plt.xlabel('Time')
+        plt.ylabel('Magnitude')
+        for spike in spikes[labels==lab]:
+            if mean == True:
+                plt.plot(spike, 'gray')
+            else:
+                plt.plot(spike)
+        if mean == True:
+            plt.plot(np.mean(spikes[labels==lab], axis=0), color=plt.cm.get_cmap('tab20').colors[lab])
+    plt.show()
+
 
 def spikes_per_cluster(spikes, labels, sim_nr):
     print("Spikes:" + str(spikes.shape))

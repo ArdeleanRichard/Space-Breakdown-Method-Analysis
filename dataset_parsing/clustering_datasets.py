@@ -78,9 +78,9 @@ def generate_simulated_data(avgPoints=250):
     X = np.vstack((C5, C1, C2, C3, C4, C6))
 
     c1Labels = np.full(len(C1), 1)
-    c2Labels = np.full(len(C2), 2)
+    c2Labels = np.full(len(C2), 4)
     c3Labels = np.full(len(C3), 3)
-    c4Labels = np.full(len(C4), 4)
+    c4Labels = np.full(len(C4), 2)
     c5Labels = np.full(len(C5), 5)
     c6Labels = np.full(len(C6), 6)
 

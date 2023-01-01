@@ -4,6 +4,7 @@ import os
 from matplotlib import pyplot as plt
 
 import visualization.scatter_plot as sp
+from dataset_parsing.clustering_datasets import generate_simulated_data
 
 from validation.comparison import get_metrics
 
@@ -23,17 +24,21 @@ from dataset_parsing.realdata_ssd import find_ssd_files, separate_by_unit, units
 os.chdir("../")
 
 
-# X, y = cds.generate_simulated_data()
+# X, y = generate_simulated_data()
 # isosplit_labels = np.loadtxt("./isosplit/uo_isosplit.csv", delimiter=',', dtype=int)
-# print(ss_metric(y, isosplit_labels))
-# get_metrics(y, isosplit_labels)
-# sp.plot(f'ISO-SPLIT on UO', X, isosplit_labels, marker='o')
+# # print(ss_metric(y, isosplit_labels))
+# # get_metrics(y, isosplit_labels)
+# # sp.plot(f'ISO-SPLIT on UO', X, isosplit_labels, marker='o')
+# sp.plot_cm_tab(f'ISO-SPLIT on UO', X, isosplit_labels, marker='o', alpha=0.9)
+# plt.show()
 #
 # X, y = sds.get_dataset_simulation_pca_2d(4)
 # isosplit_labels = np.loadtxt("./isosplit/sim4_isosplit.csv", delimiter=',', dtype=int)
 # print(ss_metric(y, isosplit_labels))
 # get_metrics(y, isosplit_labels)
 # sp.plot(f'ISO-SPLIT on Sim4', X, isosplit_labels, marker='o')
+# sp.plot_cm_tab(f'ISO-SPLIT on Sim4', X, isosplit_labels, marker='o', alpha=0.9)
+# plt.show()
 #
 # X, y = sds.get_dataset_simulation_pca_2d(1)
 # isosplit_labels = np.loadtxt("./isosplit/sim1_isosplit.csv", delimiter=',', dtype=int)
@@ -64,11 +69,11 @@ os.chdir("../")
 
 
 
-for nr_comp in [3,4]:
-    data, y = sds.get_dataset_simulation(4)
-    isosplit_labels = np.loadtxt(f"./isosplit/sim4_{nr_comp}d_isosplit.csv", delimiter=',', dtype=int)
-    print(ss_metric(y, isosplit_labels))
-    get_metrics(y, isosplit_labels)
+# for nr_comp in [3,4]:
+#     data, y = sds.get_dataset_simulation(4)
+#     isosplit_labels = np.loadtxt(f"./isosplit/sim4_{nr_comp}d_isosplit.csv", delimiter=',', dtype=int)
+#     print(ss_metric(y, isosplit_labels))
+#     get_metrics(y, isosplit_labels)
 
 
 
@@ -77,37 +82,37 @@ for nr_comp in [3,4]:
 
 
 
-# DATASET_PATH = '../DATA/TINS/M017_0004_Tetrode_try2/ssd/'
-#
-# spikes_per_unit, unit_multitrode, _ = parse_ssd_file(DATASET_PATH)
-# MULTITRODE_WAVEFORM_LENGTH = 232
-# WAVEFORM_LENGTH = 58
-# TIMESTAMP_LENGTH = 1
-# NR_MULTITRODES = 8
-# NR_ELECTRODES_PER_MULTITRODE = 4
-# MULTITRODE_CHANNEL = 7
-#
-# timestamp_file, waveform_file, event_timestamps_filename, event_codes_filename = find_ssd_files(DATASET_PATH)
-#
-# waveforms = read_waveforms(waveform_file)
-#
-# waveforms_by_unit = separate_by_unit(spikes_per_unit, waveforms, MULTITRODE_WAVEFORM_LENGTH)
-#
-# units_in_multitrode, labels = units_by_channel(unit_multitrode, waveforms_by_unit,
-#                                                data_length=MULTITRODE_WAVEFORM_LENGTH,
-#                                                number_of_channels=NR_MULTITRODES)
-# units_by_multitrodes = split_multitrode(units_in_multitrode, MULTITRODE_WAVEFORM_LENGTH, WAVEFORM_LENGTH)
-#
-# labels = labels[MULTITRODE_CHANNEL]
-#
-# data_electrode1 = units_by_multitrodes[MULTITRODE_CHANNEL][0]
-#
-# pca_ = PCA(n_components=3)
-# pca_electrode1 = pca_.fit_transform(data_electrode1)
-# isosplit_labels = np.loadtxt(f"./isosplit/realdata_isosplit.csv", delimiter=',', dtype=int)
-#
-# sp.plot(f'ISO-SPLIT on Electrode 1', pca_electrode1, isosplit_labels, marker='o', alpha=0.5)
-# plt.show()
-#
-# print(ss_metric(labels, isosplit_labels))
-# get_metrics(labels, isosplit_labels)
+DATASET_PATH = '../DATA/TINS/M017_0004_Tetrode_try2/ssd/'
+
+spikes_per_unit, unit_multitrode, _ = parse_ssd_file(DATASET_PATH)
+MULTITRODE_WAVEFORM_LENGTH = 232
+WAVEFORM_LENGTH = 58
+TIMESTAMP_LENGTH = 1
+NR_MULTITRODES = 8
+NR_ELECTRODES_PER_MULTITRODE = 4
+MULTITRODE_CHANNEL = 7
+
+timestamp_file, waveform_file, event_timestamps_filename, event_codes_filename = find_ssd_files(DATASET_PATH)
+
+waveforms = read_waveforms(waveform_file)
+
+waveforms_by_unit = separate_by_unit(spikes_per_unit, waveforms, MULTITRODE_WAVEFORM_LENGTH)
+
+units_in_multitrode, labels = units_by_channel(unit_multitrode, waveforms_by_unit,
+                                               data_length=MULTITRODE_WAVEFORM_LENGTH,
+                                               number_of_channels=NR_MULTITRODES)
+units_by_multitrodes = split_multitrode(units_in_multitrode, MULTITRODE_WAVEFORM_LENGTH, WAVEFORM_LENGTH)
+
+labels = labels[MULTITRODE_CHANNEL]
+
+data_electrode1 = units_by_multitrodes[MULTITRODE_CHANNEL][0]
+
+pca_ = PCA(n_components=3)
+pca_electrode1 = pca_.fit_transform(data_electrode1)
+isosplit_labels = np.loadtxt(f"./isosplit/realdata_isosplit.csv", delimiter=',', dtype=int)
+
+sp.plot(f'ISO-SPLIT on Electrode 1', pca_electrode1, isosplit_labels, marker='o', alpha=0.5)
+plt.show()
+
+print(ss_metric(labels, isosplit_labels))
+get_metrics(labels, isosplit_labels)

@@ -89,6 +89,6 @@ def plot_sorted_data(title, data, labels, nr_dim=2, show=False):
     data = np.array(data)
     pca_ = PCA(n_components=nr_dim)
     data_pca = pca_.fit_transform(data)
-    sp.plot(title, data_pca, labels)
+    sp.plot_cm_tab(title, data_pca, labels)
     if show==True:
         plt.show()
